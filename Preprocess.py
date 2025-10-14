@@ -25,6 +25,31 @@ class Preprocessor:
         self.user_tagged = self.loader.load_user_tagged_artist("user_taggedartists.dat")
         self.user_friends = self.loader.load_user_friends("user_friends.dat")
 
+        self.user_artists['artistID'] = pd.to_numeric(self.user_artists['artistID'], errors='coerce')
+        self.user_artists['userID'] = pd.to_numeric(self.user_artists['userID'], errors='coerce')
+
+        self.user_tagged['artistID'] = pd.to_numeric(self.user_tagged['artistID'], errors='coerce')
+        self.user_tagged['userID'] = pd.to_numeric(self.user_tagged['userID'], errors='coerce')
+        self.user_tagged['tagID'] = pd.to_numeric(self.user_tagged['tagID'], errors='coerce')
+
+        self.user_friends['userID'] = pd.to_numeric(self.user_friends['userID'], errors='coerce')
+        self.user_friends['friendID'] = pd.to_numeric(self.user_friends['friendID'], errors='coerce')
+
+        self.user_artists.dropna(subset=['artistID', 'userID'], inplace=True)
+        self.user_tagged.dropna(subset=['artistID', 'userID', 'tagID'], inplace=True)
+        self.user_friends.dropna(subset=['userID', 'friendID'], inplace=True)
+
+        self.user_artists['artistID'] = self.user_artists['artistID'].astype(int)
+        self.user_artists['userID'] = self.user_artists['userID'].astype(int)
+        self.user_tagged['artistID'] = self.user_tagged['artistID'].astype(int)
+        self.user_tagged['userID'] = self.user_tagged['userID'].astype(int)
+        self.user_tagged['tagID'] = self.user_tagged['tagID'].astype(int)
+        self.user_friends['userID'] = self.user_friends['userID'].astype(int)
+        self.user_friends['friendID'] = self.user_friends['friendID'].astype(int)
+        self.tags['tagID'] = pd.to_numeric(self.tags['tagID'], errors='coerce')
+        self.tags.dropna(subset=['tagID'], inplace=True)
+        self.tags['tagID'] = self.tags['tagID'].astype(int)
+
     def clean_and_filter(self):
         self.user_artists.drop_duplicates(inplace=True)
         self.user_tagged.drop_duplicates(inplace=True)
@@ -79,7 +104,8 @@ class Preprocessor:
         # The VALUSE in the matrix correspond to the TF-IDF weight for that TAG and ARTIST from the tag_vectors we created
         for idx, row in artist_tags.iterrows():
             artist_id = int(row['artistID'])
-            embedding_matrix[artist_id] = tag_vectors[idx]
+            if artist_id < embedding_matrix.shape[0]:
+                embedding_matrix[artist_id] = tag_vectors[idx]
 
         self.tag_embeddings = embedding_matrix
         self.vectorizer = vectorizer

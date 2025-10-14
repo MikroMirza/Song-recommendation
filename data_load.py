@@ -5,17 +5,25 @@ class DataLoader:
     def __init__(self, path:str):
         self.path = path
 
-
     def load_file(self, filename: str, columns: list[str]) -> pd.DataFrame:
         filepath = os.path.join(self.path, filename)
-        try:
-            df = pd.read_csv(filepath, delimiter="\t", header=None, names=columns, encoding="utf-7")
-            return df
-        except FileNotFoundError:
-            raise FileNotFoundError(f"No file with that name: {filename}")
-        except Exception:
-            raise Exception(f"File ain't loadin' {filename}")
+        encodings_to_try = ["utf-8", "utf-7", "latin1", "ISO-8859-1", "cp1252"]
 
+        for enc in encodings_to_try:
+            try:
+                df = pd.read_csv(
+                    filepath,
+                    delimiter="\t",
+                    header=None,
+                    names=columns,
+                    encoding=enc
+                )
+                print(f"[INFO] Loaded {filename} successfully with encoding {enc}")
+                return df
+            except UnicodeDecodeError:
+                continue
+
+        raise Exception(f" Could not load {filename}")
 
     def load_artists(self, filename: str) ->pd.DataFrame:
         # ARTIST:           id     name     url     pictureURL
