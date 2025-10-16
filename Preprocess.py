@@ -89,7 +89,7 @@ class Preprocessor:
         # Group tags per artist
         artist_tags = merged.groupby('artistID')['tagValue'].apply(lambda x: " ".join(x)).reset_index()
 
-        # Vectorize with built in TF-IDF (MAYBE WE CREATE OUR OWN TF-IDF DOWN THE ROUTE IDK)
+        # Vectorize with built in TF-IDF
         vectorizer = TfidfVectorizer(max_features=128)
         # Creates a vector that converts [metal, rock, metal, metal, metal, pop, metal, heavy metal, ...] into a vector of [0.73, 0.43, 0.11, ...]
         # So we transfer the tag names into the frequency of them being used for this artist vs for the rest of the artists
