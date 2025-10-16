@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from Preprocess import Preprocessor
 
 class KNNTagRecommender:
     def __init__(self, k: int = 5, tag_weight: float = 0.3):
@@ -9,8 +10,9 @@ class KNNTagRecommender:
         self.user_tag_matrix = None
         self.artist_tag_matrix = None
 
-    def fit(self, user_artist_matrix: pd.DataFrame, user_tags: pd.DataFrame):
+    def fit(self, user_artist_matrix: pd.DataFrame, user_tags: pd.DataFrame, pp: Preprocessor):
         self.user_artist_matrix = user_artist_matrix
+        self._pp = pp
 
         #Build artist-tag matrix (1 or 0 - artist either has tag or he doesn't)
         artist_tags = user_tags[['artistID', 'tagID']].drop_duplicates()
@@ -51,24 +53,28 @@ class KNNTagRecommender:
         return sorted(sims.items(), key=lambda x: x[1], reverse=True)[:self.k]
 
     def recommend(self, user_id, n=5):
-        #Base KNN score
         neighbors = self._nearest_users(user_id)
         ids, sims = zip(*neighbors)
         neighbor_matrix = self.user_artist_matrix.loc[list(ids)]
         weighted = np.dot(sims, neighbor_matrix.values) / np.sum(sims)
         base_scores = pd.Series(weighted, index=self.user_artist_matrix.columns)
 
-        #Tag preference
-        user_tag_pref = self.user_tag_matrix.loc[user_id].values
-        tag_scores = np.dot(user_tag_pref, self.artist_tag_matrix.values.T)
-        tag_scores = pd.Series(tag_scores, index=self.artist_tag_matrix.index)
+        common_tags = self.user_tag_matrix.columns.intersection(self.artist_tag_matrix.columns)
+        user_tag_pref = self.user_tag_matrix.loc[user_id, common_tags].values
+        artist_tag_mat = self.artist_tag_matrix[common_tags]
 
-        #Combine score
+        tag_scores = np.dot(user_tag_pref, artist_tag_mat.values.T)
+        tag_scores = pd.Series(tag_scores, index=artist_tag_mat.index)
+
         tag_scores_aligned = tag_scores.reindex(base_scores.index, fill_value=0)
         combined = base_scores * (1 - self.tag_weight) + tag_scores_aligned * self.tag_weight
 
-        #Remove already listened artists
         user_vector = self.user_artist_matrix.loc[user_id]
         combined = combined[user_vector == 0]
+        combined = combined.sort_values(ascending=False).head(n)
 
-        return combined.sort_values(ascending=False).head(n)
+        combined_df = combined.to_frame(name='score').reset_index()
+        combined_df['artistID'] = combined_df['artistID'].astype(str)
+        combined_df = combined_df.merge(self._pp.artists, left_on='artistID', right_on='id', how='left')
+
+        return combined_df
