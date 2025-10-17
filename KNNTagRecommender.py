@@ -75,6 +75,8 @@ class KNNTagRecommender:
 
         combined_df = combined.to_frame(name='score').reset_index()
         combined_df['artistID'] = combined_df['artistID'].astype(str)
-        combined_df = combined_df.merge(self._pp.artists, left_on='artistID', right_on='id', how='left')
+        artists = self._pp.artists.copy()
+        artists["id"] = artists["id"].astype(str)
+        combined_df = combined_df.merge(artists, left_on='artistID', right_on='id', how='left')
 
         return combined_df
