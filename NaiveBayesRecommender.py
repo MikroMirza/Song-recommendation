@@ -32,7 +32,7 @@ class NaiveBayesRecommender:
         X_train = np.vstack([X_pos, X_neg])
         y_train = np.concatenate([y_pos, y_neg])
 
-        model = BernoulliNB()
+        model = MultinomialNB()
         model.fit(X_train, y_train)
 
         unseen_artists = negative_candidates
