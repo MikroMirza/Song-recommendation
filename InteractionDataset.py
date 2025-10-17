@@ -15,7 +15,8 @@ class InteractionDataset(Dataset):
             neg_candidates = list(all_items - pos_items)
             if len(neg_candidates) == 0:
                 continue
-            neg_sample = np.random.choice(neg_candidates, size=min(len(pos_items), len(neg_candidates)), replace=False)
+            # neg_sample = np.random.choice(neg_candidates, size=min(len(pos_items), len(neg_candidates)), replace=False)
+            neg_sample = np.random.choice(neg_candidates, size=min(len(pos_items) * 4, len(neg_candidates)),replace=False)
             for ni in neg_sample:
                 negatives.append((u, ni))
 

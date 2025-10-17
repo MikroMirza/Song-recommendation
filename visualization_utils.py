@@ -5,9 +5,6 @@ import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
 
-# ======================================================
-# 📊 USER–ARTIST INTERACTION DISTRIBUTIONS
-# ======================================================
 def plot_user_interaction_distribution(user_artists_df: pd.DataFrame):
     interaction_counts = user_artists_df['userID'].value_counts()
     plt.figure(figsize=(10, 5))

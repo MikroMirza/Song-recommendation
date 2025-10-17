@@ -18,7 +18,7 @@ class NeuMF_Hybrid(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
         self.user_embedding_gmf = nn.Embedding(num_users,gmf_embedding_dim)
-        self.item_embedding_gmf = nn.Embedding(num_items, gmf_embedding_dim)
+        self.item_embedding_gmf = nn.Embedding(num_items, gimf_embedding_dm)
 
         self.user_embedding_mlp = nn.Embedding(num_users,mlp_embedding_dim)
         self.item_embedding_mlp = nn.Embedding(num_items, mlp_embedding_dim)

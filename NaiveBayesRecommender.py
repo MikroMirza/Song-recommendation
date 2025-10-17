@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB
+
 
 class NaiveBayesRecommender:
     def __init__(self, tag_embeddings: np.ndarray):
@@ -31,7 +32,7 @@ class NaiveBayesRecommender:
         X_train = np.vstack([X_pos, X_neg])
         y_train = np.concatenate([y_pos, y_neg])
 
-        model = MultinomialNB()
+        model = BernoulliNB()
         model.fit(X_train, y_train)
 
         unseen_artists = negative_candidates
